@@ -1,0 +1,16 @@
+
+services:
+  db:
+    image: postgres:15
+    container_name: smartticket_db
+    environment:
+      POSTGRES_DB: smartticket
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
