@@ -24,7 +24,7 @@ An intelligent support ticket management system with automatic categorization us
 
 ### 1. Extract the project
 ```bash
-unzip YourName_Assessment.zip
+unzip ChiragJogi_Assessment.zip
 cd SmartTicket
 ```
 
