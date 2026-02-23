@@ -7,6 +7,7 @@ from datetime import timedelta
 from .models import Ticket
 from .serializers import TicketSerializer
 from django.db.models import Q
+from .llm_service import *
 
 
 @api_view(['POST', 'GET'])
@@ -174,3 +175,68 @@ def ticket_stats(request):
     }
     
     return Response(stats, status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST'])
+def ticket_classify(request):
+    """
+    POST /api/tickets/classify/ - Classify ticket description using LLM
+    
+    Request body:
+    {
+        "description": "My app keeps crashing when I try to upload images"
+    }
+    
+    Response:
+    {
+        "suggested_category": "technical",
+        "suggested_priority": "high"
+    }
+    """
+    
+    # Get description from request
+    description = request.data.get('description', '').strip()
+    
+    if not description:
+        return Response(
+            {'error': 'Description is required'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Initialize LLM service
+    try:
+        llm_service = LLMService()
+    except ValueError as e:
+        # API key not configured
+        return Response(
+            {
+                'error': 'LLM service not available',
+                'suggested_category': 'general',
+                'suggested_priority': 'medium'
+            },
+            status=status.HTTP_503_SERVICE_UNAVAILABLE
+        )
+    
+    # Classify ticket
+    result = llm_service.classify_ticket(description)
+    
+    if result:
+        # Classification successful
+        return Response(
+            {
+                'suggested_category': result['category'],
+                'suggested_priority': result['priority']
+            },
+            status=status.HTTP_200_OK
+        )
+    else:
+        # Classification failed - return defaults
+        return Response(
+            {
+                'error': 'Classification failed',
+                'suggested_category': 'general',
+                'suggested_priority': 'medium'
+            },
+            status=status.HTTP_200_OK
+        )
