@@ -10,8 +10,10 @@ function TicketForm({ onTicketCreated }) {
   });
 
   const [loading, setLoading] = useState(false);
+  const [classifying, setClassifying] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -20,10 +22,50 @@ function TicketForm({ onTicketCreated }) {
     });
   };
 
+  // AI Classification
+  const handleGetAISuggestion = async () => {
+    if (!formData.description.trim()) {
+      alert('Please enter a description first!');
+      return;
+    }
+
+    setClassifying(true);
+    setError(null);
+    setAiSuggestion(null);
+
+    try {
+      const response = await axios.post(
+        'http://127.0.0.1:8000/api/tickets/classify/',
+        { description: formData.description }
+      );
+
+      // AI suggestion received
+      const { suggested_category, suggested_priority } = response.data;
+
+      setAiSuggestion({
+        category: suggested_category,
+        priority: suggested_priority
+      });
+
+      // Auto-fill the dropdowns
+      setFormData({
+        ...formData,
+        category: suggested_category,
+        priority: suggested_priority
+      });
+
+    } catch (err) {
+      console.error('AI classification error:', err);
+      setError('AI suggestion failed. You can still submit manually.');
+    } finally {
+      setClassifying(false);
+    }
+  };
+
+  // Submit Ticket
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Reset messages
     setError(null);
     setSuccess(false);
     setLoading(true);
@@ -34,7 +76,6 @@ function TicketForm({ onTicketCreated }) {
         formData
       );
 
-      // Success
       setSuccess(true);
       
       // Clear form
@@ -44,8 +85,8 @@ function TicketForm({ onTicketCreated }) {
         category: 'general',
         priority: 'medium'
       });
+      setAiSuggestion(null);
 
-      // Notify parent component
       if (onTicketCreated) {
         onTicketCreated(response.data);
       }
@@ -96,17 +137,49 @@ function TicketForm({ onTicketCreated }) {
           />
         </div>
 
+        {/* AI Suggestion Button */}
+        <div style={{ marginBottom: '15px' }}>
+          <button
+            type="button"
+            onClick={handleGetAISuggestion}
+            disabled={classifying || !formData.description.trim()}
+            style={{
+              padding: '10px 20px',
+              fontSize: '14px',
+              backgroundColor: classifying ? '#ccc' : '#28a745',
+              color: 'white',
+              border: 'none',
+              cursor: classifying ? 'not-allowed' : 'pointer',
+              marginRight: '10px'
+            }}
+          >
+            {classifying ? '🤖 Analyzing...' : '🤖 Get AI Suggestion'}
+          </button>
+          
+          {aiSuggestion && (
+            <span style={{ color: '#28a745', fontSize: '14px' }}>
+              ✅ AI suggested: {aiSuggestion.category} / {aiSuggestion.priority}
+            </span>
+          )}
+        </div>
+
         {/* Category */}
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px' }}>
             Category: <span style={{ color: 'red' }}>*</span>
+            {aiSuggestion && <span style={{ color: '#28a745', fontSize: '12px' }}> (AI suggested)</span>}
           </label>
           <select
             name="category"
             value={formData.category}
             onChange={handleChange}
             required
-            style={{ width: '100%', padding: '8px', fontSize: '14px' }}
+            style={{ 
+              width: '100%', 
+              padding: '8px', 
+              fontSize: '14px',
+              backgroundColor: aiSuggestion ? '#d4edda' : 'white'
+            }}
           >
             <option value="billing">Billing</option>
             <option value="technical">Technical</option>
@@ -119,19 +192,26 @@ function TicketForm({ onTicketCreated }) {
         <div style={{ marginBottom: '15px' }}>
           <label style={{ display: 'block', marginBottom: '5px' }}>
             Priority: <span style={{ color: 'red' }}>*</span>
+            {aiSuggestion && <span style={{ color: '#28a745', fontSize: '12px' }}> (AI suggested)</span>}
           </label>
           <select
             name="priority"
             value={formData.priority}
             onChange={handleChange}
             required
-            style={{ width: '100%', padding: '8px', fontSize: '14px' }}
+            style={{ 
+              width: '100%', 
+              padding: '8px', 
+              fontSize: '14px',
+              backgroundColor: aiSuggestion ? '#d4edda' : 'white'
+            }}
           >
             <option value="low">Low</option>
             <option value="medium">Medium</option>
             <option value="high">High</option>
             <option value="critical">Critical</option>
           </select>
+          <small style={{ color: '#666' }}>You can change AI suggestions if needed</small>
         </div>
 
         {/* Submit Button */}
