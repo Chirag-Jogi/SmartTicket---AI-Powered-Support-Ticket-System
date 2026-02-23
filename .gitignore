@@ -56,9 +56,13 @@ build/
 .env.test.local
 .env.production.local
 
-# Docker
-*.log
-
 # OS
 .DS_Store
 Thumbs.db
+
+# Docker
+*.log
+.env.docker
+
+# Frontend production build
+frontend/build/
