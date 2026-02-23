@@ -64,32 +64,67 @@ class LLMService:
         """
         Build the classification prompt for Gemini
         """
-        prompt = f"""You are a support ticket classification assistant. Analyze the following support ticket description and classify it into a category and priority level.
+        prompt = f"""You are a support ticket classification assistant. Analyze the support ticket and classify it accurately.
 
 **Ticket Description:**
 {description}
 
-**Categories:**
-- billing: Issues related to payments, charges, refunds, subscriptions
-- technical: Technical problems, bugs, app crashes, performance issues
-- account: Account access, login issues, password resets, profile settings
-- general: Questions, feature requests, feedback, or anything else
+---
 
-**Priority Levels:**
-- low: Minor issues, questions, feature requests, no urgency
-- medium: Normal issues that need attention but aren't urgent
-- high: Important issues affecting user experience, time-sensitive
-- critical: Severe issues, service outages, data loss, payment problems
+**CATEGORIES (with examples):**
 
-**Instructions:**
-1. Analyze the description carefully
-2. Consider urgency indicators (words like "urgent", "immediately", "can't access", "not working")
-3. Consider impact (affects work, payments, security)
-4. Respond ONLY with valid JSON in this exact format:
+**billing** - Payment and money-related issues ONLY
+Examples: "charged twice", "refund not received", "subscription cancelled but still charged", "payment method declined"
+NOT billing: profile pictures, upload errors, slow loading
 
-{{"category": "billing", "priority": "high"}}
+**technical** - Software bugs, errors, crashes, performance issues
+Examples: "app crashes", "error message appears", "can't upload files", "feature not working", "page won't load", "slow performance"
+Key indicators: error messages, crashes, upload failures, technical malfunctions
 
-Do not include any explanation, markdown formatting, or additional text. Only output the JSON object."""
+**account** - Login, password, email changes, account settings (NOT technical errors)
+Examples: "forgot password", "can't log in", "want to change email", "delete my account", "update profile information"
+NOT account: upload errors (that's technical), anything with error messages
+
+**general** - Everything else: questions, feedback, feature requests, how-to inquiries
+Examples: "how do I...", "can you add...", "suggestion for improvement", "when will X be available"
+
+---
+
+**PRIORITY LEVELS (be conservative - when in doubt, go lower):**
+
+**critical** - ONLY for: complete service outage, data loss, security breach, account locked out entirely
+Examples: "entire app is down", "lost all my data", "account hacked", "can't access anything"
+NOT critical: payment issues (they get resolved), single feature broken, slow performance
+
+**high** - Significantly impacts user's main workflow or involves money actively blocked
+Examples: "can't complete purchase for urgent need", "payment failed for time-sensitive transaction", "main feature completely broken preventing work"
+Important: money issues are high ONLY if time-sensitive or actively blocking work
+
+**medium** - Normal issues that need fixing but user can work around or aren't time-sensitive
+Examples: "one feature not working but others work", "slow performance", "payment failed but can retry", "error in non-critical feature"
+Default for most technical issues and payment problems that can be retried
+
+**low** - Minor inconveniences, questions, feature requests, cosmetic issues
+Examples: "small visual bug", "feature request", "how-to question", "typo in text"
+
+---
+
+**DISAMBIGUATION RULES:**
+1. File upload errors = technical (NOT account), even if it's profile pictures
+2. Payment failures = billing + high ONLY if time-critical, otherwise medium
+3. Slow performance = technical + medium (NOT high unless completely unusable)
+4. "Can't access" + error = technical (NOT account unless it's login/password specifically)
+5. When unsure about priority: choose the LOWER option
+
+---
+
+**OUTPUT FORMAT:**
+Respond ONLY with valid JSON (no markdown, no explanation):
+
+{{"category": "technical", "priority": "medium"}}
+
+Analyze the description above and classify it now."""
+
 
         return prompt
     
