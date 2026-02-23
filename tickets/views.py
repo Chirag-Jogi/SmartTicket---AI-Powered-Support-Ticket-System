@@ -1,6 +1,9 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.db.models import Count, Q
+from django.utils import timezone
+from datetime import timedelta
 from .models import Ticket
 from .serializers import TicketSerializer
 from django.db.models import Q
@@ -98,3 +101,76 @@ def ticket_update(request, pk):
         serializer.errors,
         status=status.HTTP_400_BAD_REQUEST
     )
+
+
+
+@api_view(['GET'])
+def ticket_stats(request):
+    """
+    GET /api/tickets/stats/ - Return aggregated statistics
+    Uses database-level aggregation (NOT Python loops)
+    """
+    
+    # Total tickets
+    total_tickets = Ticket.objects.count()
+    
+    # Open tickets (status = 'open')
+    open_tickets = Ticket.objects.filter(status='open').count()
+    
+    # Average tickets per day
+    if total_tickets > 0:
+        # Get the date of first ticket
+        first_ticket = Ticket.objects.order_by('created_at').first()
+        
+        if first_ticket:
+            # Calculate days since first ticket
+            days_active = (timezone.now() - first_ticket.created_at).days
+            
+            # Avoid division by zero
+            if days_active == 0:
+                days_active = 1
+            
+            avg_tickets_per_day = round(total_tickets / days_active, 1)
+        else:
+            avg_tickets_per_day = 0.0
+    else:
+        avg_tickets_per_day = 0.0
+    
+    # Priority breakdown - DATABASE AGGREGATION
+    priority_breakdown = {}
+    priority_stats = Ticket.objects.values('priority').annotate(
+        count=Count('id')
+    )
+    
+    for stat in priority_stats:
+        priority_breakdown[stat['priority']] = stat['count']
+    
+    # Ensure all priorities are present (even if count is 0)
+    for priority in ['low', 'medium', 'high', 'critical']:
+        if priority not in priority_breakdown:
+            priority_breakdown[priority] = 0
+    
+    # Category breakdown - DATABASE AGGREGATION
+    category_breakdown = {}
+    category_stats = Ticket.objects.values('category').annotate(
+        count=Count('id')
+    )
+    
+    for stat in category_stats:
+        category_breakdown[stat['category']] = stat['count']
+    
+    # Ensure all categories are present (even if count is 0)
+    for category in ['billing', 'technical', 'account', 'general']:
+        if category not in category_breakdown:
+            category_breakdown[category] = 0
+    
+    # Build response
+    stats = {
+        'total_tickets': total_tickets,
+        'open_tickets': open_tickets,
+        'avg_tickets_per_day': avg_tickets_per_day,
+        'priority_breakdown': priority_breakdown,
+        'category_breakdown': category_breakdown
+    }
+    
+    return Response(stats, status=status.HTTP_200_OK)
