@@ -1,5 +1,6 @@
 
 services:
+  # PostgreSQL Database
   db:
     image: postgres:15
     container_name: smartticket_db
@@ -11,6 +12,57 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - smartticket_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Django Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: smartticket_backend
+    command: /app/start.sh
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:       
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - smartticket_network
+
+  # React Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: smartticket_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+    networks:
+      - smartticket_network
+    stdin_open: true
+    tty: true
 
 volumes:
   postgres_data:
+
+networks:
+  smartticket_network:
+    driver: bridge
