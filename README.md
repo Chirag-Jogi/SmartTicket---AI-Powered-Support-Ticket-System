@@ -71,9 +71,20 @@ Wait for all services to start (5-10 minutes first time).
 **Note:** Without a valid API key, the AI suggestion feature will show an error, but you can still create tickets manually.
 
 ### 5. Create admin user (optional)
+
+The Django admin panel is available but not required for core functionality.
+
+To create an admin user:
 ```bash
 docker exec -it smartticket_backend python manage.py createsuperuser
 ```
+Follow the prompts:
+- Username: (your choice, e.g., admin)
+- Email: (your choice, e.g., admin@example.com)
+- Password: (your choice)
+- Password confirmation: (same password)
+
+Then access the admin panel at: http://localhost:8000/admin
 
 ## API Endpoints
 
