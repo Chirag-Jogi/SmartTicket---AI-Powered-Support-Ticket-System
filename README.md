@@ -6,8 +6,9 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An intelligent support ticket management system with automatic categorization using AI (Google Gemini).
+An intelligent support ticket management system with **AI-powered automatic categorization** using Google Gemini API. Built with Django REST Framework, React, PostgreSQL, and Docker.
 
+---
 
 ## ✨ Features at a Glance
 
@@ -15,44 +16,69 @@ An intelligent support ticket management system with automatic categorization us
   <tr>
     <td width="50%">
       <img src="docs/screenshots/homepage.png" alt="Dashboard">
-      <p align="center"><b>Stats Dashboard</b></p>
+      <p align="center"><b>📊 Stats Dashboard</b></p>
     </td>
     <td width="50%">
       <img src="docs/screenshots/ai-suggestion.png" alt="AI Classification">
-      <p align="center"><b>AI-Powered Classification</b></p>
+      <p align="center"><b>🤖 AI-Powered Classification</b></p>
     </td>
   </tr>
   <tr>
     <td width="50%">
       <img src="docs/screenshots/ticket-list.png" alt="Ticket List">
-      <p align="center"><b>Advanced Filtering</b></p>
+      <p align="center"><b>🔍 Advanced Filtering</b></p>
     </td>
     <td width="50%">
       <img src="docs/screenshots/stats-dashboard.png" alt="Analytics">
-      <p align="center"><b>Real-Time Analytics</b></p>
+      <p align="center"><b>📈 Real-Time Analytics</b></p>
     </td>
   </tr>
 </table>
 
+---
 
+## 🚀 Key Features
 
-## Tech Stack
-- **Backend:** Django 5.0 + Django REST Framework + PostgreSQL
-- **Frontend:** React 18
-- **LLM:** Google Gemini 1.5 Flash
-- **Infrastructure:** Docker + Docker Compose
+- 🤖 **AI-Powered Ticket Classification** - Automatic categorization and priority assignment using Google Gemini 1.5 Flash
+- 📊 **Real-Time Analytics Dashboard** - Live statistics with priority and category breakdowns
+- 🔍 **Advanced Filtering & Search** - Multi-parameter filtering with full-text search
+- ⚡ **Database-Level Aggregation** - High-performance stats using Django ORM
+- 🐳 **One-Command Deployment** - Fully containerized with Docker Compose
+- ✅ **Smart Validation** - User can accept or override AI suggestions
+- 🔄 **Status Management** - Track tickets from open to resolved
+- 🎯 **RESTful API** - Clean, well-documented API endpoints
 
-## Features
-- ✅ Automatic ticket categorization using AI
-- ✅ Priority suggestion based on ticket description
-- ✅ Real-time statistics dashboard
-- ✅ Advanced filtering and search
-- ✅ Status management workflow
-- ✅ Database-level aggregation for stats
+---
 
-## Prerequisites
-- Docker Desktop installed and running
-- Google Gemini API key ([Get one free](https://ai.google.dev/))
+## 🏗️ Tech Stack
+
+**Backend:**
+- Django 5.0 + Django REST Framework
+- PostgreSQL 15
+- Google Gemini 1.5 Flash API
+- Python 3.11
+
+**Frontend:**
+- React 18
+- Axios for API communication
+- Responsive design
+
+**Infrastructure:**
+- Docker + Docker Compose
+- Automated database migrations
+- Health checks & dependency management
+
+---
+
+## 📋 Prerequisites
+
+Before you begin, ensure you have:
+
+- **Docker Desktop** installed and running ([Download here](https://www.docker.com/products/docker-desktop))
+- **Google Gemini API Key** ([Get free key](https://ai.google.dev/))
+- **Git** (for cloning the repository)
+
+---
 
 ## 🚀 Quick Start
 
@@ -275,5 +301,59 @@ docker-compose down
 docker-compose down -v
 ```
 
-## Author
-Built as a technical assessment project demonstrating full-stack development with AI integration.
+---
+
+## 🐛 Troubleshooting
+
+### Port Already in Use
+```bash
+# Check what's using the port
+netstat -ano | findstr :3000
+netstat -ano | findstr :8000
+```
+
+### Docker Build Fails
+```bash
+docker system prune -a --volumes
+docker-compose up --build
+```
+
+### AI Classification Not Working
+
+1. Check if `GEMINI_API_KEY` is set in `.env`
+2. Verify key is valid at https://ai.google.dev/
+3. Check backend logs: `docker logs smartticket_backend`
+
+---
+
+## 📁 Project Structure
+```
+SmartTicket/
+├── backend/                    # Django settings
+├── tickets/                    # Main app
+│   ├── models.py              # Ticket model
+│   ├── views.py               # API views
+│   ├── serializers.py         # DRF serializers
+│   └── llm_service.py         # Gemini integration
+├── frontend/                   # React app
+│   └── src/
+│       ├── App.js
+│       ├── TicketForm.js
+│       ├── TicketList.js
+│       └── Stats.js
+├── docker-compose.yml
+├── Dockerfile.backend
+├── Dockerfile.frontend
+├── requirements.txt
+└── README.md
+```
+
+## 👤 Author
+
+**Chirag Jogi**
+
+- GitHub: https://github.com/Chirag-Jogi
+- LinkedIn: https://www.linkedin.com/in/chiragjogi27/
+
+---
+
