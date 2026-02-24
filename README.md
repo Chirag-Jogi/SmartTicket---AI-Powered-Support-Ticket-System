@@ -2,6 +2,34 @@
 
 An intelligent support ticket management system with automatic categorization using AI (Google Gemini).
 
+
+## ✨ Features at a Glance
+
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/homepage.png" alt="Dashboard">
+      <p align="center"><b>Stats Dashboard</b></p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/ai-suggestion.png" alt="AI Classification">
+      <p align="center"><b>AI-Powered Classification</b></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/ticket-list.png" alt="Ticket List">
+      <p align="center"><b>Advanced Filtering</b></p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/stats-dashboard.png" alt="Analytics">
+      <p align="center"><b>Real-Time Analytics</b></p>
+    </td>
+  </tr>
+</table>
+
+
+
 ## Tech Stack
 - **Backend:** Django 5.0 + Django REST Framework + PostgreSQL
 - **Frontend:** React 18
