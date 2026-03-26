@@ -6,7 +6,7 @@
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An intelligent support ticket management system with **AI-powered automatic categorization** using Google Gemini API. Built with Django REST Framework, React, PostgreSQL, and Docker.
+An intelligent support ticket management system with **AI-powered automatic categorization** using OpenRouter API. Built with Django REST Framework, React, PostgreSQL, and Docker.
 
 ---
 
@@ -39,7 +39,7 @@ An intelligent support ticket management system with **AI-powered automatic cate
 
 ## 🚀 Key Features
 
-- 🤖 **AI-Powered Ticket Classification** - Automatic categorization and priority assignment using Google Gemini 1.5 Flash
+- 🤖 **AI-Powered Ticket Classification** - Automatic categorization and priority assignment using OpenRouter API free models
 - 📊 **Real-Time Analytics Dashboard** - Live statistics with priority and category breakdowns
 - 🔍 **Advanced Filtering & Search** - Multi-parameter filtering with full-text search
 - ⚡ **Database-Level Aggregation** - High-performance stats using Django ORM
@@ -55,7 +55,7 @@ An intelligent support ticket management system with **AI-powered automatic cate
 **Backend:**
 - Django 5.0 + Django REST Framework
 - PostgreSQL 15
-- Google Gemini 1.5 Flash API
+- OpenRouter API (Free Tier Models)
 - Python 3.11
 
 **Frontend:**
@@ -75,7 +75,7 @@ An intelligent support ticket management system with **AI-powered automatic cate
 Before you begin, ensure you have:
 
 - **Docker Desktop** installed and running ([Download here](https://www.docker.com/products/docker-desktop))
-- **Google Gemini API Key** ([Get free key](https://ai.google.dev/))
+- **OpenRouter API Key** ([Get free key](https://openrouter.ai/))
 - **Git** (for cloning the repository)
 
 ---
@@ -99,20 +99,19 @@ cp .env.example .env
 copy .env.example .env
 ```
 
-**Get your free Gemini API key:**
+**Get your free OpenRouter API key:**
 
-1. Visit [Google AI Studio](https://ai.google.dev/)
-2. Click **"Get API Key"**
-3. Sign in with your Google account
-4. Click **"Create API Key"**
-5. Copy the key (starts with `AIzaSy...`)
+1. Visit [OpenRouter](https://openrouter.ai/)
+2. Create an account or sign in
+3. Go to your settings and click **"Create Key"**
+4. Copy the key - **it is completely free to use with our enabled fallback models!** Just create a key, paste it, and you are good to go.
 
 **Edit `.env` file and add your API key:**
 ```env
-GEMINI_API_KEY=AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXX
+OPENROUTER_API_KEY=sk-or-v1-...
 ```
 
-Replace `AIzaSyXXX...` with your actual key.
+Replace `sk-or-v1-...` with your actual OpenRouter key.
 
 ### Step 3: Start the Application
 ```bash
@@ -246,12 +245,12 @@ CREATE TABLE tickets_ticket (
 
 ## 🎯 Design Decisions
 
-### Why Google Gemini?
+### Why OpenRouter?
 
-- ✅ **Free Tier:** 1,500 requests/day at no cost
-- ✅ **Fast Response:** 1-2 second classification time
-- ✅ **High Accuracy:** 90%+ correct categorization
-- ✅ **No Credit Card:** Start immediately without payment
+- ✅ **Free Models Always Available:** Automatically falls back between Llama 3, Gemma, Mistral, and Nemotron!
+- ✅ **Fast Response:** Lightning-fast routing classification time!
+- ✅ **High Accuracy:** State-of-the-art free models for ticket categorization.
+- ✅ **No Credit Card:** Just generate an API key and start immediately!
 
 ### Why Database-Level Aggregation?
 
@@ -320,8 +319,8 @@ docker-compose up --build
 
 ### AI Classification Not Working
 
-1. Check if `GEMINI_API_KEY` is set in `.env`
-2. Verify key is valid at https://ai.google.dev/
+1. Check if `OPENROUTER_API_KEY` is set in `.env`
+2. Verify key is valid at https://openrouter.ai/
 3. Check backend logs: `docker logs smartticket_backend`
 
 ---

@@ -1,28 +1,29 @@
 import os
-from google import genai
-from google.genai import types
 import json
+import requests
 from typing import Dict, Optional
+
+FREE_MODELS = [
+    "nvidia/nemotron-3-nano-30b-a3b:free",        # User requested: Fast Nemotron 30B model
+    "openrouter/free",                            # Best first choice: OpenRouter auto-routes to whatever is fastest right now
+    "meta-llama/llama-3.2-3b-instruct:free",      # Tiny 3B model, instantly fast
+    "google/gemma-3-27b-it:free",                 # Fast 27B model
+    "mistralai/mistral-small-3.1-24b-instruct:free"
+]
 
 
 class LLMService:
     """
-    Service for interacting with Google Gemini API for ticket classification
+    Service for interacting with OpenRouter API for ticket classification
     """
     
     def __init__(self):
-        """Initialize Gemini client"""
-        api_key = os.getenv('GEMINI_API_KEY')
-        if not api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment variables")
+        """Initialize OpenRouter API key"""
+        self.api_key = os.getenv('OPENROUTER_API_KEY')
+        if not self.api_key:
+            raise ValueError("OPENROUTER_API_KEY not found in environment variables")
         
-        # Initialize Client with API version
-        self.client = genai.Client(
-            api_key=api_key,
-            http_options=types.HttpOptions(api_version='v1')
-        )
-        
-        self.model = 'gemini-2.5-flash'
+        self.models = FREE_MODELS
     
     def classify_ticket(self, description: str) -> Optional[Dict[str, str]]:
         """
@@ -41,28 +42,47 @@ class LLMService:
         # Construct the prompt
         prompt = self._build_classification_prompt(description)
         
-        try:
-            # Call Gemini API
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt
-            )
-            
-            # Extract response text
-            response_text = response.text.strip()
-            
-            # Parse JSON response
-            result = self._parse_response(response_text)
-            
-            return result
-            
-        except Exception as e:
-            print(f"LLM classification error: {e}")
-            return None
+        for model in self.models:
+            try:
+                # Call OpenRouter API
+                response = requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {self.api_key}",
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": "http://localhost:8000",
+                        "X-Title": "SmartTicket",
+                    },
+                    json={
+                        "model": model,
+                        "messages": [
+                            {"role": "user", "content": prompt}
+                        ]
+                    },
+                    timeout=15
+                )
+                
+                response.raise_for_status()
+                response_data = response.json()
+                
+                # Extract response text
+                response_text = response_data['choices'][0]['message']['content'].strip()
+                
+                # Parse JSON response
+                result = self._parse_response(response_text)
+                
+                if result:
+                    return result
+                    
+            except Exception as e:
+                print(f"LLM classification error with model {model}: {e}")
+                continue  # Fallback to the next model in the list
+                
+        return None
     
     def _build_classification_prompt(self, description: str) -> str:
         """
-        Build the classification prompt for Gemini
+        Build the classification prompt for OpenRouter
         """
         prompt = f"""You are a support ticket classification assistant. Analyze the support ticket and classify it accurately.
 
@@ -130,7 +150,7 @@ Analyze the description above and classify it now."""
     
     def _parse_response(self, response_text: str) -> Optional[Dict[str, str]]:
         """
-        Parse Gemini's response and extract category and priority
+        Parse OpenRouter's response and extract category and priority
         """
         try:
             # Remove any markdown code blocks if present
